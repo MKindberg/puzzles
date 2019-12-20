@@ -36,77 +36,71 @@ int getParam(int* cmds, int pos, int cmd, int param)
   exit(1);
 }
 
-int execute(int* commands, int len, int* data, int len2)
+int execute(int* cmds, int cmdlen, int* cmdN, int* input, int inlen, int* output)
 {
-  int p1, p2, p3, in, output = -1, j = 0;
-  int* cmds = malloc(len*sizeof(int));
-  memcpy(cmds, commands, len*sizeof(int));
+  int p1, p2, p3, in, outlen = 1, incount = 0;
 
-  for(int i = 0; i < len;) {
-    int cmd = cmds[i++];
+  while(*cmdN < cmdlen) {
+    int cmd = cmds[(*cmdN)++];
     switch(cmd % 100) {
       case 1: // Add
-        p1 = getParam(cmds, i++, cmd, 1);
-        p2 = getParam(cmds, i++, cmd, 2);
-        p3 = cmds[i++];
+        p1 = getParam(cmds, (*cmdN)++, cmd, 1);
+        p2 = getParam(cmds, (*cmdN)++, cmd, 2);
+        p3 = cmds[(*cmdN)++];
         cmds[p3] = p1 + p2;
         break;
       case 2: // Multiply
-        p1 = getParam(cmds, i++, cmd, 1);
-        p2 = getParam(cmds, i++, cmd, 2);
-        p3 = cmds[i++];
+        p1 = getParam(cmds, (*cmdN)++, cmd, 1);
+        p2 = getParam(cmds, (*cmdN)++, cmd, 2);
+        p3 = cmds[(*cmdN)++];
         cmds[p3] = p1 * p2;
         break;
       case 3: // Input
-        p1 = cmds[i++];
-        if(j == len2) {
-          printf("Please provide input: ");
-          scanf("%d", &in);
-          cmds[p1] = in;
+        p1 = cmds[(*cmdN)++];
+        if(inlen-- == -1) {
+          fprintf(stderr, "Error: no data for input");
+          return 2;
         } else {
-          cmds[p1] = data[j++];
+          cmds[p1] = input[inlen];
         }
         break;
       case 4: // Output
-        p1 = getParam(cmds, i++, cmd, 1);
-        if(output != -1)
-          printf("Result: %d\n", output);
-        output = p1;
+        p1 = getParam(cmds, (*cmdN)++, cmd, 1);
+        *output = p1;
+        return 1;
         break;
       case 5: // Jump if true
-        p1 = getParam(cmds, i++, cmd, 1);
-        p2 = getParam(cmds, i++, cmd, 2);
+        p1 = getParam(cmds, (*cmdN)++, cmd, 1);
+        p2 = getParam(cmds, (*cmdN)++, cmd, 2);
         if(p1)
-          i = p2;
+          (*cmdN) = p2;
         break;
       case 6: // Jump if false
-        p1 = getParam(cmds, i++, cmd, 1);
-        p2 = getParam(cmds, i++, cmd, 2);
+        p1 = getParam(cmds, (*cmdN)++, cmd, 1);
+        p2 = getParam(cmds, (*cmdN)++, cmd, 2);
         if(!p1)
-          i = p2;
+          (*cmdN) = p2;
         break;
       case 7: // Less than
-        p1 = getParam(cmds, i++, cmd, 1);
-        p2 = getParam(cmds, i++, cmd, 2);
-        p3 = cmds[i++];
+        p1 = getParam(cmds, (*cmdN)++, cmd, 1);
+        p2 = getParam(cmds, (*cmdN)++, cmd, 2);
+        p3 = cmds[(*cmdN)++];
         cmds[p3] = p1 < p2;
         break;
       case 8: // Equals
-        p1 = getParam(cmds, i++, cmd, 1);
-        p2 = getParam(cmds, i++, cmd, 2);
-        p3 = cmds[i++];
+        p1 = getParam(cmds, (*cmdN)++, cmd, 1);
+        p2 = getParam(cmds, (*cmdN)++, cmd, 2);
+        p3 = cmds[(*cmdN)++];
         cmds[p3] = p1 == p2;
         break;
       case 99: // Exit
-        goto exit;
+        return 0;
       default: // Error
         fprintf(stderr, "Something went wrong\n");
-        return 1;
+        return 2;
     }
   }
-exit:
-  free(cmds);
-  return output;
+  return 0;
 }
 
 int main(int argc, const char* argv[])
@@ -134,20 +128,36 @@ int main(int argc, const char* argv[])
 
   int (*perms)[5] = malloc(120*5*sizeof(int));
 
-  int data[2];
-  int seq[5] = {0,1,2,3,4};
+  int input[2] = {0};
+  int output, status, max = 0;
+  //int seq[5] = {0,1,2,3,4};
+  int seq[5] = {5,6,7,8,9};
   int index = permutations(perms, 0, seq, 0, 5);
-  int *perm, max = 0;
+  int *perm;
+  int *cmds[5], cmdN[5];
+  for(int i = 0; i < 5; ++i)
+    cmds[i] = malloc(count*sizeof(int));
+
   for(int j = 0; j < 120; ++j) {
     perm = perms[j];
-    data[1] = 0;
+    input[0] = 0;
+    int inlen = 2;
+    // Reset cmds
     for(int i = 0; i < 5; ++i) {
-      data[0] = perm[i];
-      data[1] = execute(commands, count, data, 2);
+      memcpy(cmds[i], commands, count*sizeof(int));
+      cmdN[i] = 0;
     }
-    if (data[1] > max){
-      max = data[1];
-    }
+    do {
+      for(int i = 0; i < 5; ++i) {
+        input[1] = perm[i];
+        status = execute(cmds[i], count, &cmdN[i], input, inlen, &output);
+        input[0] = output;
+      }
+      inlen = 1;
+    } while(status == 1);
+
+    if (output > max)
+      max = output;
   }
 
   printf("\nLargest output: %d\n", max);
