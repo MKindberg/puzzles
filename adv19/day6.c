@@ -90,7 +90,6 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  char *obj1, *obj2;
   char buf[10];
   int count = 0;
   while(fgets(buf, 10, fp))
