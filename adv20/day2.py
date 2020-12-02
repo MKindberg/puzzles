@@ -1,15 +1,9 @@
 import re
+import functools
 
-f = open("inp2.txt", "r")
-pwds = f.read().split("\n")
-f.close()
-
-pattern = "^(\d+)-(\d+) ([a-z]): ([a-z]+)$"
-
-num_valid1 = 0
-num_valid2 = 0
-for data in pwds[:-1]:
-    m = re.match(pattern, data)
+def validate(num_valid, string):
+    pattern = "^(\d+)-(\d+) ([a-z]): ([a-z]+)$"
+    m = re.match(pattern, string)
     low = int(m.group(1))
     high = int(m.group(2))
     letter = m.group(3)
@@ -17,10 +11,15 @@ for data in pwds[:-1]:
 
     num = len(list(filter(lambda l: l == letter, pwd)))
     if(num >= low and num <= high):
-        num_valid1 += 1
+        num_valid[0] += 1
     if(pwd[low-1] == letter and pwd[high-1] != letter or
        pwd[low-1] != letter and pwd[high-1] == letter):
-        num_valid2 += 1
+        num_valid[1] += 1
+    return num_valid
 
-print(num_valid1)
-print(num_valid2)
+
+f = open("inp2.txt", "r")
+pwds = f.read().split("\n")
+f.close()
+
+print(functools.reduce(validate, pwds[:-1], [0, 0]))
