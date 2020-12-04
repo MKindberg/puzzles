@@ -1,32 +1,23 @@
 import re
 import functools
 
-patterns = [
-    r"byr:(\S+)",
-    r"iyr:(\S+)",
-    r"eyr:(\S+)",
-    r"hgt:(\S+)",
-    r"hcl:(\S+)",
-    r"ecl:(\S+)",
-    r"pid:(\S+)"
-]
 rules = [
-    lambda byr: int(byr) >= 1920 and int(byr) <= 2002,
-    lambda iyr: int(iyr) >= 2010 and int(iyr) <= 2020,
-    lambda eyr: int(eyr) >= 2020 and int(eyr) <= 2030,
-    lambda hgt: hgt[-2:] == "cm" and int(hgt[:-2]) >= 150 and int(hgt[:-2]) <= 193 or hgt[-2:] == "in" and int(hgt[:-2]) >= 59 and int(hgt[:-2]) <= 76,
-    lambda hcl: re.match(r"^#[0-9a-f]{6}$", hcl) != None,
-    lambda ecl: ecl in ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"],
-    lambda pid: re.match(r"^\d{9}$", pid) != None
+    (r"byr:(\S+)", lambda byr: int(byr) >= 1920 and int(byr) <= 2002),
+    (r"iyr:(\S+)", lambda iyr: int(iyr) >= 2010 and int(iyr) <= 2020),
+    (r"eyr:(\S+)", lambda eyr: int(eyr) >= 2020 and int(eyr) <= 2030),
+    (r"hgt:(\S+)", lambda hgt: hgt[-2:] == "cm" and int(hgt[:-2]) >= 150 and int(hgt[:-2]) <= 193 or hgt[-2:] == "in" and int(hgt[:-2]) >= 59 and int(hgt[:-2]) <= 76),
+    (r"hcl:(\S+)", lambda hcl: re.match(r"^#[0-9a-f]{6}$", hcl) != None),
+    (r"ecl:(\S+)", lambda ecl: ecl in ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]),
+    (r"pid:(\S+)", lambda pid: re.match(r"^\d{9}$", pid) != None)
 ]
 
 def validate(acc, passport):
     valid = True
-    for i in range(len(patterns)):
-        m = re.search(patterns[i], passport)
+    for i in range(len(rules)):
+        m = re.search(rules[i][0], passport)
         if m == None:
             return acc
-        valid = valid and rules[i](m.group(1))
+        valid = valid and rules[i][1](m.group(1))
     if valid:
         return (acc[0]+1, acc[1]+1)
     return (acc[0]+1, acc[1])
