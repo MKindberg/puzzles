@@ -1,3 +1,4 @@
+import time
 import re
 import functools
 
@@ -11,19 +12,18 @@ rules = [
     (r"pid:(\S+)", lambda pid: re.match(r"^\d{9}$", pid) != None)
 ]
 
-def validate(acc, passport):
-    valid = True
-    for i in range(len(rules)):
-        m = re.search(rules[i][0], passport)
-        if m == None:
-            return acc
-        valid = valid and rules[i][1](m.group(1))
-    if valid:
-        return (acc[0]+1, acc[1]+1)
-    return (acc[0]+1, acc[1])
+def hasFields(passport):
+    return functools.reduce(lambda acc, rule: re.search(rule[0], passport) != None if acc else False, rules, True)
+
+def validateFields(passport):
+    return functools.reduce(lambda acc, rule: rule[1](re.search(rule[0], passport).group(1)) if acc else False, rules, True)
 
 f = open("inp4.txt", "r")
 data = f.read().split("\n\n")
 f.close()
 
-print(functools.reduce(validate, data, (0, 0)))
+valid1 = list(filter(hasFields, data))
+print(len(valid1))
+
+valid2 = list(filter(validateFields, valid1))
+print(len(valid2))
