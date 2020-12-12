@@ -81,4 +81,5 @@ f = open("../inp/5.in", "r")
 data = f.read().strip()
 f.close()
 program = [int(x) for x in data.split(",")]
+print(run_program(program, 1)[1])
 print(run_program(program, 5)[1])
