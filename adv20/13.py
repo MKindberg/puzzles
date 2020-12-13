@@ -16,7 +16,7 @@ n = [bus[0] for bus in busses]
 N = math.prod(n)
 y = [N//x for x in n]
 a = [-bus[1] for bus in busses]
-z = [list(filter(lambda x: (x*N//m) % m == 1, range(m)))[0] for m in n]
+z = [pow(y[i], -1, n[i]) for i in range(len(n))]
 
 print(sum([math.prod([y[i], a[i], z[i]]) for i in range(len(n))]) % N)
 
