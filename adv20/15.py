@@ -1,4 +1,3 @@
-import time
 numbers = [0,12,6,13,20,1,17]
 
 def solve(numbers, length): # Slow but memory efficient
@@ -22,8 +21,6 @@ def solve2(numbers, length):
 
     num = 0
     for i in range(len(numbers), length-1):
-        if num > len(last_spoken):
-            last_spoken += (num -len(last_spoken)+1) * [-1]
         num2 = i - last_spoken[num] if last_spoken[num] != -1 else 0
         last_spoken[num] = i
         num = num2
