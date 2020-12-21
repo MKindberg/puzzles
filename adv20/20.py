@@ -137,10 +137,19 @@ def fit_blocks(blocks, image):
     for y in range(height):
         for x in range(width-1):
             fit_pair(blocks, image[y][x], image[y][x+1])
+    for x in range(width):
+        blocks[image[0][x]] = flip(blocks[image[0][x]], 1)
     for y in range(1, height):
         if fits(blocks[image[y-1][0]], blocks[image[y][0]]) != 1:
             for x in range(width):
                 blocks[image[y][x]] = flip(blocks[image[y][x]], 1)
+    for y in range(height):
+        for x in range(width):
+            if y > 0:
+                assert fits(blocks[image[y-1][x]], blocks[image[y][x]]) == 1
+            if x > 0:
+                assert fits(blocks[image[y][x-1]], blocks[image[y][x]]) == 4
+
 
 def find_monster(image, monster, y, x):
     m_width = len(monster[0])
@@ -167,8 +176,6 @@ def find_monsters(image, monster):
     m_height = len(monster)
 
     monsters = 0
-    y = 0
-    x = 0
     for y in range(i_height-m_height):
         for x in range(i_width-m_width):
             if find_monster(image, monster, y, x):
@@ -238,6 +245,7 @@ monster = [list(x) for x in monster.splitlines()]
 width = len(image[0])*8
 height = len(image)*8
 full_img = [['.' for x in range(width)] for y in range(height)]
+
 
 for y in range(height):
     for x in range(width):
