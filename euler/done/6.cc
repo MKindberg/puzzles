@@ -15,7 +15,7 @@ int main()
     ssum += i*i;
   }
   cout << sum*sum - ssum << endl;
-  
+
   return 0;
 }
 

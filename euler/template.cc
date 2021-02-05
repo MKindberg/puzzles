@@ -1,5 +1,5 @@
 #!/bin/bash
-tail +3 $0 | g++ -std=c++17 -O3 -x c++ - && exec ./a.out
+tail +3 $0 | g++ -std=c++17 -Wall -Werror -O3 -x c++ - && exec ./a.out
 
 #include <iostream>
 #include <chrono> 
